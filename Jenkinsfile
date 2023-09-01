@@ -22,11 +22,9 @@ pipeline{
 
         stage('Plan'){
             steps{
-                sh 'cmd /c echo %CD%'
-                sh 'cmd /c cd Terraform/Terraform-files'
-                sh 'cmd /c terraform.exe init'
-                sh 'cmd /c terraform.exe plan -out tfplan'
-                sh 'cmd /c terraform.exe show -no-color tfplan > tfplan.txt'
+                sh 'pwd ; cd terraform/Terraform-files ; terraform init'
+                sh "pwd ; cd terraform/Terraform-files ; terraform plan -out tfplan"
+                sh 'pwd ; cd terraform/Terraform-files ; terraform show -no-color tfplan > tfplan.txt'
             }
         }
 
