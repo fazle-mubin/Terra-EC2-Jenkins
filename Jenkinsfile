@@ -20,13 +20,28 @@ pipeline{
             }
         }
 
-        stage('Plan'){
-            steps{
-                sh 'pwd ; cd terraform/Terraform-files ; terraform init'
-                sh "pwd ; cd terraform/Terraform-files ; terraform plan -out tfplan"
-                sh 'pwd ; cd terraform/Terraform-files ; terraform show -no-color tfplan > tfplan.txt'
+        // stage('Plan'){
+        //     steps{
+        //         sh 'pwd ; cd terraform/Terraform-files ; terraform init'
+        //         sh "pwd ; cd terraform/Terraform-files ; terraform plan -out tfplan"
+        //         sh 'pwd ; cd terraform/Terraform-files ; terraform show -no-color tfplan > tfplan.txt'
+        //     }
+        // }
+
+        stage('Plan') {
+            steps {
+                bat(
+                script: '
+                    pwd
+                    cd terraform/Terraform-files
+                    terraform init
+                    terraform plan -out tfplan
+                    terraform show -no-color tfplan > tfplan.txt
+                ',
+                )
             }
-        }
+}
+
 
         stage('Plan Approval'){
             when{
