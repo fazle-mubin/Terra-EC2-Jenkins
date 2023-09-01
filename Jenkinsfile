@@ -14,7 +14,7 @@ pipeline{
             steps{
                 script{
                     dir('Terraform'){
-                        git "https://github.com/fazle-mubin/Terra-EC2-Jenkins"
+                        git branch: 'main', url: 'https://github.com/fazle-mubin/Terra-EC2-Jenkins.git'
                     }
                 }
             }
