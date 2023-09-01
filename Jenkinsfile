@@ -30,15 +30,12 @@ pipeline{
 
         stage('Plan') {
             steps {
-                bat(
-                script: '
-                    pwd
-                    cd terraform/Terraform-files
-                    terraform init
-                    terraform plan -out tfplan
-                    terraform show -no-color tfplan > tfplan.txt
-                ',
-                )
+                bat '''@echo off
+                set "pwd=%cd%"
+                cd terraform/Terraform-files
+                terraform init
+                terraform plan -out tfplan
+                terraform show -no-color tfplan > tfplan.txt'''
             }
 }
 
