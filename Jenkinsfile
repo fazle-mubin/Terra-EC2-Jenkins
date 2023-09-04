@@ -23,7 +23,7 @@ pipeline{
         stage('Init'){
             steps{
                 withAWS(credentials: 'AWS_Credentials', region: 'us-east-1'){
-                    sh 'pwd ; cd terraform/Terraform-files ; terraform init'
+                    sh 'pwd ; cd Terraform/Terraform-files ; terraform init'
                 }
             }
         }
