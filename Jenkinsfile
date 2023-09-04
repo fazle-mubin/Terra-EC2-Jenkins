@@ -30,12 +30,9 @@ pipeline{
 
         stage('Plan') {
             steps {
-                bat '''@echo off
-                set "pwd=%cd%"
-                cd terraform/Terraform-files
-                terraform init
-                terraform plan -out tfplan
-                terraform show -no-color tfplan > tfplan.txt'''
+                sh 'pwd;cd terraform/Terraform-files ; terraform init'
+                sh "pwd;cd terraform/Terraform-files ; terraform plan -out tfplan"
+                sh 'pwd;cd terraform/Terraform-files ; terraform show -no-color tfplan > tfplan.txt'
             }
 }
 
@@ -49,7 +46,7 @@ pipeline{
 
             steps{
                 script {
-                    def plan = readFile 'Terraform/tfplan.txt'
+                    def plan = readFile 'Terraform/Terraform-files/tfplan.txt'
                     input message: "Apply the plan or not?"
                     parameters: [text(name:'Plan', description: 'Please review the plan', defaultValue: plan)]
                 }
@@ -58,7 +55,7 @@ pipeline{
 
         stage("Apply"){
             steps{
-                sh 'cd Terraform/ ; terraform apply -input=false tfplan'
+                sh 'cd Terraform/Terraform-files ; terraform apply -input=false tfplan'
             }
         }
     }
