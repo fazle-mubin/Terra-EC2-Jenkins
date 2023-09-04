@@ -3,10 +3,10 @@ pipeline{
         booleanParam(name: 'autoApprove', defaultValue: false, description: 'Do you want to apply the generated plan?')
     }
 
-    environment{
-        AWS_Access_Key_ID = credentials('AWS_Access_Key_ID')
-        AWS_Secret_Access_Key = credentials('AWS_Secret_Access_Key')
-    }
+    // environment{
+    //     AWS_Access_Key_ID = credentials('AWS_Access_Key_ID')
+    //     AWS_Secret_Access_Key = credentials('AWS_Secret_Access_Key')
+    // }
 
     agent any
     stages{
@@ -20,19 +20,21 @@ pipeline{
             }
         }
 
-        // stage('Plan'){
-        //     steps{
-        //         sh 'pwd ; cd terraform/Terraform-files ; terraform init'
-        //         sh "pwd ; cd terraform/Terraform-files ; terraform plan -out tfplan"
-        //         sh 'pwd ; cd terraform/Terraform-files ; terraform show -no-color tfplan > tfplan.txt'
-        //     }
-        // }
+        stage('Init'){
+            steps{
+                withAWS(credentials: 'AWS_Credentials', region: 'us-east-1'){
+                    sh 'pwd ; cd terraform/Terraform-files ; terraform init'
+                }
+            }
+        }
 
         stage('Plan') {
             steps {
-                sh 'pwd;cd Terraform/Terraform-files ; terraform init'
-                sh "pwd;cd Terraform/Terraform-files ; terraform plan -out tfplan"
-                sh 'pwd;cd Terraform/Terraform-files ; terraform show -no-color tfplan > tfplan.txt'
+                withAWS(credentials: 'AWS_Credentials', region: 'us-east-1'){
+                    sh "pwd;cd Terraform/Terraform-files ; terraform plan -out tfplan"
+                    sh 'pwd;cd Terraform/Terraform-files ; terraform show -no-color tfplan > tfplan.txt'
+                    sh 'pwd;cd Terraform/Terraform-files ; cp tfplan.txt tfplanbck.txt'
+                }
             }
 }
 
@@ -55,7 +57,8 @@ pipeline{
 
         stage("Apply"){
             steps{
-                sh 'cd Terraform/Terraform-files ; terraform apply -input=false tfplan'
+                withAWS(credentials: 'AWS_Credentials', region: 'us-east-1'){
+                    sh 'cd Terraform/Terraform-files ; terraform apply -input=false tfplan'}
             }
         }
     }
