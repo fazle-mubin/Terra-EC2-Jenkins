@@ -61,5 +61,12 @@ pipeline{
                     sh 'cd Terraform/Terraform-files ; terraform apply -input=false tfplan'}
             }
         }
+
+        stage("Destroy"){
+            steps{
+                withAWS(credentials: 'AWS_Credentials', region: 'us-east-1'){
+                    sh 'cd Terraform/Terraform-files ; terraform destroy -input=false tfplan'}
+            }
+        }
     }
 }
