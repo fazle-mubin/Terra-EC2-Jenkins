@@ -20,26 +20,43 @@ pipeline{
             }
         }
 
-        stage('Init'){
+        stage('Initiating tflint'){
+            steps{
+                echo 'Testing phase'
+                echo '------------------------------------------------'
+                sh 'pwd ; cd Terraform/Terraform-files ; tflint --init'
+            }
+        }
+
+        stage('Applying tflint'){
+            steps{
+                echo 'Applying the Tests'
+                echo '------------------------------------------------'
+                sh 'pwd ; cd Terraform/Terraform-files ; tflint'
+            }
+        }        
+
+        stage('Terraform Init'){
             steps{
                 withAWS(credentials: 'AWS_Credentials', region: 'us-east-1'){
+                    echo 'Terraform phase'
+                    echo '------------------------------------------------'                    
                     sh 'pwd ; cd Terraform/Terraform-files ; terraform init'
                 }
             }
         }
 
-        stage('Plan') {
+        stage('Terraform Plan') {
             steps {
                 withAWS(credentials: 'AWS_Credentials', region: 'us-east-1'){
                     sh "pwd;cd Terraform/Terraform-files ; terraform plan -out tfplan"
                     sh 'pwd;cd Terraform/Terraform-files ; terraform show -no-color tfplan > tfplan.txt'
-                    sh 'pwd;cd Terraform/Terraform-files ; cp tfplan.txt tfplanbck.txt'
+                    sh 'pwd;cd Terraform/Terraform-files ; cp tfplan.txt /var/lib/jenkins/workspace/Terraform-EC2/tfplanbck.txt'
                 }
             }
-}
+        }
 
-
-        stage('Plan Approval'){
+        stage('Terraform Plan Approval'){
             when{
                 not{
                     equals expected: true, actual: params.autoApprove
@@ -55,18 +72,35 @@ pipeline{
             }
         }
 
-        stage("Apply"){
+        stage("Terraform Apply"){
             steps{
                 withAWS(credentials: 'AWS_Credentials', region: 'us-east-1'){
                     sh 'cd Terraform/Terraform-files ; terraform apply -input=false tfplan'}
             }
         }
 
-        stage("Destroy"){
+        stage("Terraform Destroy"){
             steps{
                 withAWS(credentials: 'AWS_Credentials', region: 'us-east-1'){
                     sh 'cd Terraform/Terraform-files ; terraform destroy -input=false tfplan'}
             }
         }
     }
+slackUploadFile channel: 'terra-jenkins-ec2', credentialId: 'Slack-jenkins-EC2', filePath: 'tfplanbck.txt', initialComment: 'Sending the tfplanbck.txt'
+    post {
+        always {
+            // One or more steps need to be included within each condition's block.
+            echo "Sending Email"
+            emailext attachLog: true, body: "${currentBuild.currentResult}: Job ${env.JOB_NAME}\nMore Info can be found here: ${env.BUILD_URL}", subject: 'Jenkins Build Notification', to: 'fazle.mubin1234@gmail.com'
+            echo "Sending Slack Message"
+            slackSend channel: 'jenkins', color: '#FF0000', message: "Project: ${env.JOB_NAME}, Build Number: ${env.BUILD_NUMBER}, Build Status:${currentBuild.result}, Build URL: ${env.BUILD_URL}", teamDomain: 'Jenkins-Portal', tokenCredentialId: 'Slack_ID'
+            echo "Sending Slack Notification"
+            script{
+            def location = "tfplanbck.txt"
+            slackUploadFile channel: 'terra-jenkins-ec2', credentialId: 'Slack-jenkins-EC2', filePath: location, initialComment: 'Sending the tfplanbck.txt'
+            }
+                
+        }
+    }
+
 }
