@@ -86,7 +86,7 @@ pipeline{
             }
         }
     }
-slackUploadFile channel: 'terra-jenkins-ec2', credentialId: 'Slack-jenkins-EC2', filePath: 'tfplanbck.txt', initialComment: 'Sending the tfplanbck.txt'
+
     post {
         always {
             // One or more steps need to be included within each condition's block.
