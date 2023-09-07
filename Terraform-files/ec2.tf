@@ -21,7 +21,7 @@ resource "aws_instance" "fazle-EC2" {
   ami = data.aws_ami.latest_amazon_linux2.id
   subnet_id = aws_subnet.fazle-subnet.id
   vpc_security_group_ids = [aws_security_group.fazle_SG_EC2.id]
-  instance_type = "t2.small"
+  instance_type = "t2.micro"
   //associate_public_ip_address = "true"
   //key_name = "ec2-key"
 

@@ -82,7 +82,7 @@ pipeline{
         stage("Terraform Destroy"){
             steps{
                 withAWS(credentials: 'AWS_Credentials', region: 'us-east-1'){
-                    sh 'cd Terraform/Terraform-files ; terraform destroy -input=false tfplan'}
+                    sh 'cd Terraform/Terraform-files ; terraform destroy -auto-approve'}
             }
         }
     }
